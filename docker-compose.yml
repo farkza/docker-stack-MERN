@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - mynetwork
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/myappdb
+    depends_on:
+      - mongodb
+    networks:
+      - mynetwork
+
+  frontend:
+    build:
+      context: ./frontend
+    networks:
+      - mynetwork
+
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - mynetwork
+
+volumes:
+  mongodb_data:
+
+networks:
+  mynetwork:
+    driver: bridge
